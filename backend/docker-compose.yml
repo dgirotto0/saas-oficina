@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: gunicorn saas_oficinas.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - .:/app  # Permite atualização dos arquivos em tempo real (útil em desenvolvimento)
+    ports:
+      - "8000:8000"  # Mapeia a porta 8000 do container para a porta 8000 do host
+    depends_on:
+      - db
+      - redis
+    environment:
+      - DEBUG=False
+      - POSTGRES_DB=saas_oficinas_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+
+  db:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=saas_oficinas_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
